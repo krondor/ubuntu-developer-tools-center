@@ -1,25 +1,25 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Russian translation for ubuntu-developer-tools-center
+# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
+# This file is distributed under the same license as the ubuntu-developer-tools-center package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: ubuntu-developer-tools-center\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2014-09-23 08:44+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2014-10-24 20:42+0000\n"
+"Last-Translator: destiriser <destiriser@me.com>\n"
+"Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2014-10-29 09:16+0000\n"
+"X-Generator: Launchpad (build 17203)\n"
 
 #: udtc/__init__.py:104
 msgid "* Command '{}':"
-msgstr ""
+msgstr "* Команда '{}':"
 
 #: udtc/__init__.py:112
 msgid "Deploy and setup developers environment easily on ubuntu"
@@ -33,7 +33,7 @@ msgstr ""
 
 #: udtc/__init__.py:116
 msgid "Show this help"
-msgstr ""
+msgstr "Показать эту справку"
 
 #: udtc/__init__.py:117
 msgid "Increase output verbosity (2 levels)"
@@ -41,7 +41,7 @@ msgstr ""
 
 #: udtc/__init__.py:119
 msgid "Remove specified framework if installed"
-msgstr ""
+msgstr "Удалить указанный фреймворк если установлен"
 
 #: udtc/tools.py:329
 msgid "# UDTC installation of {}\n"
@@ -61,57 +61,59 @@ msgstr ""
 
 #: udtc/interactions/__init__.py:96
 msgid " ({})"
-msgstr ""
+msgstr " ({})"
 
 #: udtc/interactions/__init__.py:100
 msgid ""
 "{}\n"
 "[{}] "
 msgstr ""
+"{}\n"
+"[{}] "
 
 #: udtc/interactions/__init__.py:103
 msgid "{} [{}] "
-msgstr ""
+msgstr "{} [{}] "
 
 #: udtc/interactions/__init__.py:111
 msgid "I Accept"
-msgstr ""
+msgstr "Принимаю"
 
 #: udtc/interactions/__init__.py:111
 msgid "a"
-msgstr ""
+msgstr "a"
 
 #: udtc/interactions/__init__.py:112
 msgid "I don't accept"
-msgstr ""
+msgstr "Не принимаю"
 
 #: udtc/interactions/__init__.py:112 udtc/interactions/__init__.py:145
 msgid "N"
-msgstr ""
+msgstr "Н"
 
 #: udtc/interactions/__init__.py:121 udtc/interactions/__init__.py:122
 msgid "{} ({})"
-msgstr ""
+msgstr "{} ({})"
 
 #: udtc/interactions/__init__.py:125
 msgid "[{}] "
-msgstr ""
+msgstr "[{}] "
 
 #: udtc/interactions/__init__.py:144
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: udtc/interactions/__init__.py:144
 msgid "y"
-msgstr ""
+msgstr "д"
 
 #: udtc/interactions/__init__.py:145
 msgid "No"
-msgstr ""
+msgstr "Нет"
 
 #: udtc/frameworks/__init__.py:240
 msgid "You can't remove {} as it isn't installed"
-msgstr ""
+msgstr "Не можете удалить {}, поскольку не установлен"
 
 #: udtc/frameworks/__init__.py:271
 msgid ""
@@ -124,7 +126,7 @@ msgstr ""
 
 #: udtc/frameworks/android.py:39
 msgid "Android"
-msgstr ""
+msgstr "Андроид"
 
 #: udtc/frameworks/android.py:39
 msgid "Android Development Environment"
@@ -132,7 +134,7 @@ msgstr ""
 
 #: udtc/frameworks/android.py:93
 msgid "Android Studio"
-msgstr ""
+msgstr "Андроид Cтудио"
 
 #: udtc/frameworks/android.py:96
 msgid "Android Studio developer environment"

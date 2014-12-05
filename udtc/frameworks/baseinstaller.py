@@ -29,10 +29,11 @@ import shutil
 import udtc.frameworks
 from udtc.decompressor import Decompressor
 from udtc.interactions import InputText, YesNo, LicenseAgreement, DisplayMessage, UnknownProgress
-from udtc.network.download_center import DownloadCenter
+from udtc.network.download_center import DownloadCenter, DownloadItem
 from udtc.network.requirements_handler import RequirementsHandler
 from udtc.ui import UI
-from udtc.tools import MainLoop, strip_tags, launcher_exists, get_icon_path, get_launcher_path
+from udtc.tools import MainLoop, strip_tags, launcher_exists, get_icon_path, get_launcher_path, \
+    Checksum, remove_framework_envs_from_user
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +52,11 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
         having a set of downloads to proceed, some eventual supported_archs."""
         self.expect_license = kwargs.get("expect_license", False)
         self.download_page = kwargs["download_page"]
-        self.require_md5 = kwargs.get("require_md5", False)
+        self.checksum_type = kwargs.get("checksum_type", None)
         self.dir_to_decompress_in_tarball = kwargs.get("dir_to_decompress_in_tarball", None)
         self.desktop_filename = kwargs.get("desktop_filename", None)
         self.icon_filename = kwargs.get("icon_filename", None)
-        for extra_arg in ["expect_license", "download_page", "require_md5", "dir_to_decompress_in_tarball",
+        for extra_arg in ["expect_license", "download_page", "checksum_type",  "dir_to_decompress_in_tarball",
                           "desktop_filename", "icon_filename"]:
             with suppress(KeyError):
                 kwargs.pop(extra_arg)
@@ -90,6 +91,7 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
         logger.debug("Mark previous installation path for cleaning.")
         self._paths_to_clean.add(self.install_path)  # remove previous installation path
         self.confirm_path(self.arg_install_path)
+        remove_framework_envs_from_user(self.name)
 
     def remove(self):
         """Remove current framework if installed
@@ -108,6 +110,7 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
                 os.remove(get_icon_path(self.icon_filename))
         with suppress(FileNotFoundError):
             shutil.rmtree(self.install_path)
+        remove_framework_envs_from_user(self.name)
         self.remove_from_config()
 
         UI.delayed_display(DisplayMessage("Suppression done"))
@@ -144,7 +147,7 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
 
     def download_provider_page(self):
         logger.debug("Download application provider page")
-        DownloadCenter([(self.download_page, None)], self.get_metadata_and_check_license, download=False)
+        DownloadCenter([DownloadItem(self.download_page, None)], self.get_metadata_and_check_license, download=False)
 
     def parse_license(self, line, license_txt, in_license):
         """Parse license per line, eventually write to license_txt if it's in the license part.
@@ -170,7 +173,7 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
             logger.error("An error occurred while downloading {}: {}".format(self.download_page, error_msg))
             UI.return_main_screen()
 
-        url, md5sum = (None, None)
+        url, checksum = (None, None)
         with StringIO() as license_txt:
             in_license = False
             in_download = False
@@ -182,15 +185,22 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
 
                 (download, in_download) = self.parse_download_link(line_content, in_download)
                 if download is not None:
-                    (newurl, newmd5sum) = download
+                    (newurl, new_checksum) = download
                     url = newurl if newurl is not None else url
-                    md5sum = newmd5sum if newmd5sum is not None else md5sum
-                    logger.debug("Found download link for {}, md5sum: {}".format(url, md5sum))
+                    checksum = new_checksum if new_checksum is not None else checksum
+                    logger.debug("Found download link for {}, checksum: {}".format(url, checksum))
+                    if url is not None:
+                        if self.checksum_type and checksum:
+                            logger.debug("Found download link for {}, checksum: {}".format(url, checksum))
+                            break
+                        elif not self.checksum_type:
+                            logger.debug("Found download link for {}".format(url))
+                            break
 
-            if url is None or (self.require_md5 and md5sum is None):
+            if url is None or (self.checksum_type and checksum is None):
                 logger.error("Download page changed its syntax or is not parsable")
                 UI.return_main_screen()
-            self.download_requests.append((url, md5sum))
+            self.download_requests.append(DownloadItem(url, Checksum(self.checksum_type, checksum)))
 
             if license_txt.getvalue() != "":
                 logger.debug("Check license agreement.")
@@ -324,8 +334,8 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
                      self.decompress_and_install_done)
         UI.display(UnknownProgress(self.iterate_until_install_done))
 
-    def create_launcher(self):
-        """Call the tools to create a launcher"""
+    def post_install(self):
+        """Call the post_install process, like creating a launcher, adding env variables…"""
         pass
 
     @MainLoop.in_mainloop_thread
@@ -341,9 +351,7 @@ class BaseInstaller(udtc.frameworks.BaseFramework):
             UI.return_main_screen()
             return
 
-        # install desktop file
-        if self.desktop_filename:
-            self.create_launcher()
+        self.post_install()
 
         # Mark as installation done in configuration
         self.mark_in_config()

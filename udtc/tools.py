@@ -17,7 +17,9 @@
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+from collections import namedtuple
 from contextlib import suppress
+from enum import unique, Enum
 from gettext import gettext as _
 from gi.repository import GLib, Gio
 from glob import glob
@@ -41,6 +43,20 @@ logger = logging.getLogger(__name__)
 _current_arch = None
 _foreign_arch = None
 _version = None
+
+profile_tag = _("# UDTC installation of {}\n")
+
+
+@unique
+class ChecksumType(Enum):
+    """Types of supported checksum algorithms."""
+    md5 = "md5"
+    sha1 = "sha1"
+
+
+class Checksum(namedtuple('Checksum', ['checksum_type', 'checksum_value'])):
+    """A combination of checksum algorithm and actual value to check."""
+    pass
 
 
 class Singleton(type):
@@ -222,7 +238,7 @@ def launcher_exists(desktop_filename):
     """Return true if the desktop filename exists"""
     exists = os.path.exists(get_launcher_path(desktop_filename))
     if not exists:
-        logger.debug("{} doesn't exists".format(desktop_filename))
+        logger.debug("{} doesn't exist".format(desktop_filename))
         return False
     return True
 
@@ -239,7 +255,10 @@ def launcher_exists_and_is_pinned(desktop_filename):
         return False
     gsettings = Gio.Settings(schema_id="com.canonical.Unity.Launcher", path="/com/canonical/unity/launcher/")
     launcher_list = gsettings.get_strv("favorites")
-    return "application://" + desktop_filename in launcher_list
+    res = "application://" + desktop_filename in launcher_list
+    if not res:
+        logger.debug("Launcher exists but is not pinned (pinned: {}).".format(launcher_list))
+    return res
 
 
 def copy_icon(source_icon_filepath, icon_filename):
@@ -311,20 +330,57 @@ def switch_to_current_user():
     os.seteuid(int(os.getenv("SUDO_UID", default=0)))
 
 
-def add_to_user_path(paths, framework_tag):
-    """Add paths to user path in .bashrc if path isn't already in PATH"""
-    paths_to_add = []
-    for path in paths:
-        if path not in os.environ['PATH']:  # we don't care how, but the path already covers it
-            paths_to_add.append(path)
-    path_string = os.pathsep.join(paths_to_add)
-
-    if not path_string:
+def remove_framework_envs_from_user(framework_tag):
+    """Remove all envs from user if found"""
+    profile_filepath = os.path.join(os.path.expanduser('~'), ".profile")
+    content = ""
+    framework_header = profile_tag.format(framework_tag)
+    try:
+        with open(profile_filepath, "r") as f:
+            content = f.read()
+    except FileNotFoundError:
+        return
+    if framework_header not in content:
         return
 
-    os.environ['PATH'] = path_string + os.pathsep + os.environ['PATH']
-    logger.debug("Adding {} to user PATH for {}".format(path_string, framework_tag))
-    with open(os.path.join(os.path.expanduser('~'), ".bashrc"), "a", encoding='utf-8') as f:
+    while(framework_header in content):
+        framework_start_index = content.find(framework_header)
+        framework_end_index = content[framework_start_index:].find("\n\n")
+        content = content[:framework_start_index] + content[framework_start_index + framework_end_index + len("\n\n"):]
+
+    # rewrite .profile and omit framework_tag
+    with open(profile_filepath + ".new", "w", encoding='utf-8') as f:
+        f.write(content)
+    os.rename(profile_filepath + ".new", profile_filepath)
+
+
+def add_env_to_user(framework_tag, env_dict):
+    """Add args to user env in .profile if the user doesn't have that env with those args
+
+    env_dict is a dictionary of:
+    { env_variable: { value: value,
+                      keep: True/False }
+    If keep is set to True, we keep previous values with :$OLDERENV."""
+
+    remove_framework_envs_from_user(framework_tag)
+
+    envs_to_insert = {}
+    for env in env_dict:
+        value = env_dict[env]["value"]
+        if env_dict[env].get("keep", True) and os.environ.get(env):
+            os.environ[env] = value + os.pathsep + os.environ[env]
+            value = "{}{}${}".format(value, os.pathsep, env)
+        else:
+            os.environ[env] = value
+        envs_to_insert[env] = value
+
+    with open(os.path.join(os.path.expanduser('~'), ".profile"), "a", encoding='utf-8') as f:
+        f.write(profile_tag.format(framework_tag))
+        for env in envs_to_insert:
+            value = envs_to_insert[env]
+            logger.debug("Adding {} to user {} for {}".format(value, env, framework_tag))
+            export = ""
+            if env != "PATH":
+                export = "export "
+            f.write("{}{}={}\n".format(export, env, value))
         f.write("\n")
-        f.write(_("# UDTC installation of {}\n").format(framework_tag))
-        f.write("PATH={}:$PATH\n".format(path_string))
