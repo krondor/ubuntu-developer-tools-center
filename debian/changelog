@@ -1,3 +1,18 @@
+ubuntu-make (0.2) vivid; urgency=medium
+
+  * Releasing under new name: ubuntu-make. Handle transition by shipping
+    a temporary binary under the older name (udtc). New command is umake.
+    Note as well that the new framework environment variable is
+    UMAKE_FRAMEWORKS.
+  * Provide compatibility binary (udtc) for now in the transitional package.
+    Also move previous configuration file location to the new one.
+  * Update Standards-Version
+  * Fix Android Studio installation, now that it reached 1.0 milestone.
+  * Removing Android Eclipse (adt) from Ubuntu Make: upstream doesn't provide
+    any bundle anymore as this tools is deprecated in favor of Android Studio.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 09 Dec 2014 08:23:33 +0100
+
 ubuntu-developer-tools-center (0.1.1-0ubuntu1) vivid; urgency=medium
 
   * Bug-fix release as Google changed their android-studio checksum from

@@ -1,4 +1,4 @@
-#!/bin/bash
+# -*- coding: utf-8 -*-
 # Copyright (C) 2014 Canonical
 #
 # Authors:
@@ -17,10 +17,20 @@
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# setup dbus environment and launch a command, pwd being the udtc dir.
-# Start command in async mode
-cd $1
-shift
-[[ $(env | grep VIRTUAL_ENV) == *env ]] && . env/bin/activate
-export $(dbus-launch)
-$@ &
+import os
+
+DEFAULT_INSTALL_TOOLS_PATH = os.path.expanduser(os.path.join("~", "tools"))
+OLD_CONFIG_FILENAME = "udtc"
+CONFIG_FILENAME = "umake"
+LSB_RELEASE_FILE = "/etc/lsb-release"
+UMAKE_FRAMEWORKS_ENVIRON_VARIABLE = "UMAKE_FRAMEWORKS"
+
+# Those are for the tests
+DOCKER_USER = "user"
+DOCKER_PASSWORD = "user"
+DOCKER_TESTIMAGE = "didrocks/docker-umake-manual"
+UMAKE_IN_CONTAINER = "/umake"
+TEST_MD5_ANDROID_STUDIO_FAKE_DATA = "490786f827f2578f788e25e423b10cec"
+TEST_MD5_ECLIPSE_ADT_32_FAKE_DATA = "3fb4db39926dca2e304b43440e4a25f1"
+TEST_MD5_ECLIPSE_ADT_64_FAKE_DATA = "3e26482c619e67b799db0a1d0da02061"
+APT_FAKE_REPO_PATH = "/apt-fake-repo"

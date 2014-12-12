@@ -31,7 +31,7 @@ import signal
 import subprocess
 import sys
 from textwrap import dedent
-from udtc import settings
+from umake import settings
 from xdg.BaseDirectory import load_first_config, xdg_config_home, xdg_data_home
 import yaml
 import yaml.scanner
@@ -44,7 +44,7 @@ _current_arch = None
 _foreign_arch = None
 _version = None
 
-profile_tag = _("# UDTC installation of {}\n")
+profile_tag = _("# Ubuntu make installation of {}\n")
 
 
 @unique
@@ -74,7 +74,12 @@ class ConfigHandler(metaclass=Singleton):
     def __init__(self):
         """Load the config"""
         self._config = {}
+        old_config_file = load_first_config(settings.OLD_CONFIG_FILENAME)
         config_file = load_first_config(settings.CONFIG_FILENAME)
+        if old_config_file:
+            if not config_file:
+                config_file = old_config_file.replace(settings.OLD_CONFIG_FILENAME, settings.CONFIG_FILENAME)
+            os.rename(old_config_file, config_file)
         logger.debug("Opening {}".format(config_file))
         try:
             with open(config_file) as f:
@@ -221,7 +226,7 @@ def is_completion_mode():
 
 def get_user_frameworks_path():
     """Return user frameworks local path"""
-    return os.path.expanduser(os.path.join('~', '.udtc', 'frameworks'))
+    return os.path.expanduser(os.path.join('~', '.umake', 'frameworks'))
 
 
 def get_icon_path(icon_filename):

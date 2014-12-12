@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/bin/bash
 # Copyright (C) 2014 Canonical
 #
 # Authors:
@@ -17,19 +17,10 @@
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import os
-
-DEFAULT_INSTALL_TOOLS_PATH = os.path.expanduser(os.path.join("~", "tools"))
-CONFIG_FILENAME = "udtc"
-LSB_RELEASE_FILE = "/etc/lsb-release"
-UDTC_FRAMEWORKS_ENVIRON_VARIABLE = "UDTC_FRAMEWORKS"
-
-# Those are for the tests
-DOCKER_USER = "user"
-DOCKER_PASSWORD = "user"
-DOCKER_TESTIMAGE = "didrocks/docker-udtc-manual"
-UDTC_IN_CONTAINER = "/udtc"
-TEST_MD5_ANDROID_STUDIO_FAKE_DATA = "490786f827f2578f788e25e423b10cec"
-TEST_MD5_ECLIPSE_ADT_32_FAKE_DATA = "3fb4db39926dca2e304b43440e4a25f1"
-TEST_MD5_ECLIPSE_ADT_64_FAKE_DATA = "3e26482c619e67b799db0a1d0da02061"
-APT_FAKE_REPO_PATH = "/apt-fake-repo"
+# setup dbus environment and launch a command, pwd being the umake dir.
+# Start command in async mode
+cd $1
+shift
+[[ $(env | grep VIRTUAL_ENV) == *env ]] && . env/bin/activate
+export $(dbus-launch)
+$@ &
