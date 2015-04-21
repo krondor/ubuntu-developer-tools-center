@@ -1,3 +1,82 @@
+ubuntu-make (0.6.2) vivid; urgency=medium
+
+  * New translations:
+    - Greek, Indonesian
+  * Updated translations:
+    - German, Spanish, French
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 02 Apr 2015 09:56:30 +0200
+
+ubuntu-make (0.6.1) vivid; urgency=medium
+
+  * Set dart-editor as the command to install the editor and adapt the tests
+    to this
+  * Fix some strings not marked for translations
+  * Print help for category with no default framework
+  * Fix get binary depends with empty starting line in debian/control
+  * Add missing tests deps in debian/tests/control
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 12 Mar 2015 08:14:02 +0100
+
+ubuntu-make (0.6) vivid; urgency=medium
+
+  * New IDEs support and various cleanups by Anton Antonov:
+    - rubymine
+    - pycharm educational
+    - pycharm professional
+    - webstorm
+    - phpstorm
+  * All of those covered by medium and large tests
+  * Add zsh support + tests (thanks Anton Antonov again)
+  * Various small code enhancements
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 18 Feb 2015 09:47:08 +0100
+
+ubuntu-make (0.5) vivid; urgency=medium
+
+  * Add Idea Ultimate support, thanks to Tin Tvrtković.
+  * Add Android NDK support.
+  * Add Dartlang support.
+  * Add Firefox Developer Edition support.
+  * Get new ftp download support as Intellij downloads can redirect to ftp
+    download based on location. Thank to Tin Tvrtković.
+  * Refresh de and es translations. Thanks to all contributors!
+  * Rationalize what is up for translations and refresh i18n templates
+    for new strings.
+  * Fix some is_installed() detection.
+  * Workaround a glib issue when some Unity launcher icon doesn't appear.
+  * Some tests enhancements, cleanups and fixes.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 12 Feb 2015 10:48:20 +0100
+
+ubuntu-make (0.4.1) vivid; urgency=medium
+
+  * Fix for Intellij IDEA download page, thanks to Tin Tvrtković.
+  * Add jayatana dependency for ides based on intellij so that even
+    older releases than vivid get appmenu support.
+  * Some misc test and docker container fixes.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 22 Jan 2015 09:00:45 +0100
+
+ubuntu-make (0.4) vivid; urgency=medium
+
+  * Add go support from the golang google compiler
+  * Add a game category with stencyl support
+  * Refactor and add some tests for those
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 06 Jan 2015 10:49:58 +0100
+
+ubuntu-make (0.3) vivid; urgency=medium
+
+  * New release featuring intellij IDEA and Pycharm support (from jetbrain)
+    in their community edition. Thanks to Tin Tvrtković for this work. They
+    both are covered by new tests.
+  * Add dependency on beautifulsoup for easier html parsing by Tin Tvrtković.
+  * Ensure we download Android Studio over https.
+  * Miscellaneous medium tests fixes.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 16 Dec 2014 09:33:21 +0100
+
 ubuntu-make (0.2) vivid; urgency=medium
 
   * Releasing under new name: ubuntu-make. Handle transition by shipping

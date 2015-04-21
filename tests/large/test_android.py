@@ -63,7 +63,7 @@ class AndroidStudioTests(LargeFrameworkTests):
         proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
         self.check_and_kill_process(["java", self.installed_path], wait_before=self.TIMEOUT_START)
-        self.assertEquals(proc.wait(self.TIMEOUT_STOP), 0)
+        self.assertEqual(proc.wait(self.TIMEOUT_STOP), 0)
 
         # ensure that it's detected as installed:
         self.child = pexpect.spawnu(self.command('{} android android-studio'.format(UMAKE)))
@@ -119,7 +119,7 @@ class AndroidStudioTests(LargeFrameworkTests):
             proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
                                     stderr=subprocess.DEVNULL)
             self.check_and_kill_process(["java", self.installed_path], wait_before=self.TIMEOUT_START)
-            self.assertEquals(proc.wait(self.TIMEOUT_STOP), 0)
+            self.assertEqual(proc.wait(self.TIMEOUT_STOP), 0)
 
     def test_android_studio_reinstall_other_path(self):
         """Reinstall android studio on another path once installed should remove the first version"""
@@ -280,3 +280,40 @@ class AndroidStudioTests(LargeFrameworkTests):
 
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.path_exists(self.installed_path))
+
+
+class AndroidNDKTests(LargeFrameworkTests):
+    """This will test the Android NDK installation"""
+
+    TIMEOUT_INSTALL_PROGRESS = 120
+
+    def setUp(self):
+        super().setUp()
+        self.installed_path = os.path.expanduser("~/tools/android/android-ndk")
+
+    @property
+    def exec_path(self):
+        return os.path.join(self.installed_path, "ndk-which")
+
+    def test_default_android_ndk_install(self):
+        """Install android ndk from scratch test case"""
+        self.child = pexpect.spawnu(self.command('{} android android-ndk'.format(UMAKE)))
+        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child.sendline("")
+        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.wait_and_no_warn()
+
+        # we have an installed launcher, added to the launcher
+        self.assertTrue(self.path_exists(self.exec_path))
+
+        # launch it, send SIGTERM and check that it exits fine
+        self.assertEqual(subprocess.check_call(self.command_as_list([self.exec_path, "gcc"]),
+                                               stdout=subprocess.DEVNULL,
+                                               stderr=subprocess.DEVNULL),
+                         0)
+
+        # ensure that it's detected as installed:
+        self.child = pexpect.spawnu(self.command('{} android android-ndk'.format(UMAKE)))
+        self.expect_and_no_warn("Android NDK is already installed.*\[.*\] ")
+        self.child.sendline()
+        self.wait_and_no_warn()

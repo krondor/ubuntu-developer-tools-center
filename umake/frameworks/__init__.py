@@ -107,8 +107,8 @@ class BaseCategory():
         if self.is_main_category:
             framework_parser = parser
         else:
-            category_parser = parser.add_parser(self.prog_name, help=self.description)
-            framework_parser = category_parser.add_subparsers(dest="framework")
+            self.category_parser = parser.add_parser(self.prog_name, help=self.description)
+            framework_parser = self.category_parser.add_subparsers(dest="framework")
         for framework in self.frameworks.values():
             framework.install_framework_parser(framework_parser)
         return framework_parser
@@ -126,8 +126,9 @@ class BaseCategory():
         # try to call default framework if any
         if not args.framework:
             if not self.default_framework:
-                message = "A default framework for category {} was requested where there is none".format(self.name)
+                message = _("A default framework for category {} was requested where there is none".format(self.name))
                 logger.error(message)
+                self.category_parser.print_usage()
                 UI.return_main_screen(status_code=1)
             self.default_framework.run_for(args)
             return
@@ -301,7 +302,8 @@ def _is_categoryclass(o):
 
 
 def _is_frameworkclass(o):
-    return inspect.isclass(o) and issubclass(o, BaseFramework)
+    """Filter concrete (non-abstract) subclasses of BaseFramework."""
+    return inspect.isclass(o) and issubclass(o, BaseFramework) and not inspect.isabstract(o)
 
 
 def load_module(module_abs_name, main_category):

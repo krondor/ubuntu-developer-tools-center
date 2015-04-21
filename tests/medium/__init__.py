@@ -21,7 +21,7 @@
 
 import os
 import subprocess
-from ..tools import get_root_dir, get_tools_helper_dir, LoggedTestCase, get_docker_path
+from ..tools import get_root_dir, get_tools_helper_dir, LoggedTestCase, get_docker_path, get_data_dir
 from time import sleep
 from umake import settings
 
@@ -40,14 +40,20 @@ class ContainerTests(LoggedTestCase):
 
         # start the local server at container startup
         if hasattr(self, "hostname"):
+            ftp_redir = hasattr(self, 'ftp')
             command.extend(["-h", self.hostname])
-            runner_cmd += "{} {} 'sudo -E env PATH={} VIRTUAL_ENV={} {} {} {}';".format(
+            runner_cmd += "{} {} 'sudo -E env PATH={} VIRTUAL_ENV={} {} {} {} {}';".format(
                 os.path.join(get_tools_helper_dir(), "run_in_umake_dir_async"),
                 settings.UMAKE_IN_CONTAINER,
                 os.getenv("PATH"), os.getenv("VIRTUAL_ENV"),
                 os.path.join(get_tools_helper_dir(), "run_local_server"),
                 self.port,
-                self.hostname)
+                self.hostname,
+                str(ftp_redir))
+
+            if ftp_redir:
+                runner_cmd += "/usr/bin/twistd ftp -p 21 -r {};".format(os.path.join(get_data_dir(), 'server-content',
+                                                                        self.hostname))
 
         if hasattr(self, "apt_repo_override_path"):
             runner_cmd += "sudo sh -c 'echo deb file:{} / > /etc/apt/sources.list';sudo apt-get update;".format(
@@ -58,6 +64,7 @@ class ContainerTests(LoggedTestCase):
                         "--dns=8.8.8.8", "--dns=8.8.4.4",  # suppress local DNS warning
                         self.image_name,
                         'sh', '-c', runner_cmd])
+
         self.container_id = subprocess.check_output(command).decode("utf-8").strip()
         self.container_ip = subprocess.check_output([get_docker_path(), "inspect", "-f",
                                                      "{{ .NetworkSettings.IPAddress }}",
@@ -121,7 +128,7 @@ class ContainerTests(LoggedTestCase):
 
     def is_in_path(self, filename):
         """Check inside the container if filename is in PATH thanks to which"""
-        return self._exec_command(self.command_as_list(["bash", "-i", "which", filename]))
+        return self._exec_command(self.command_as_list(["bash", "-l", "which", filename]))
 
     def create_file(self, path, content):
         """Create file inside the container.replace in path current user with the docker user"""
